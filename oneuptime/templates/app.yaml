@@ -41,12 +41,21 @@ spec:
       containers:
         - image: {{ printf "%s/%s/%s:%s" $.Values.image.registry $.Values.image.repository "app" $.Values.image.tag }}
           name: {{ printf "%s-%s" $.Release.Name "app"  }}
+          # Startup probe
+          startupProbe:
+            httpGet:
+              path: /status/live
+              port: 3002
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 6
           # Liveness probe
           livenessProbe:
             httpGet:
               path: /status/live
               port: {{ $.Values.port.app }}
-            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 30
           # Readyness Probe
@@ -54,7 +63,6 @@ spec:
             httpGet:
               path: /status/ready
               port: {{ $.Values.port.app }}
-            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 30
           {{- if $.Values.containerSecurityContext }}
