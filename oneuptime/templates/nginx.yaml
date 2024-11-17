@@ -55,12 +55,18 @@ spec:
       containers:
         - image: {{ printf "%s/%s/%s:%s" $.Values.image.registry $.Values.image.repository "nginx" $.Values.image.tag }}
           name: {{ printf "%s-%s" $.Release.Name "nginx"  }}
+          # Startup probe
+          startupProbe:
+            httpGet:
+              path: /status/live
+              port: 7851
+            periodSeconds: 10
+            failureThreshold: 6
           # Liveness probe
           livenessProbe:
             httpGet:
               path: /status/live
               port: 7851
-            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 30
           # Readyness Probe
@@ -68,7 +74,6 @@ spec:
             httpGet:
               path: /status/ready
               port: 7851
-            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 30
           volumeMounts:
