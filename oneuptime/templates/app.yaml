@@ -45,7 +45,7 @@ spec:
           startupProbe:
             httpGet:
               path: /status/live
-              port: 3002
+              port: {{ $.Values.port.app }}
               scheme: HTTP
             timeoutSeconds: 1
             periodSeconds: 10
