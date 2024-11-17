@@ -50,12 +50,18 @@ spec:
       containers:
         - image: {{ printf "%s/%s/%s:%s" $.Values.image.registry $.Values.image.repository "ingestor" $.Values.image.tag }}
           name: {{ printf "%s-%s" $.Release.Name "ingestor"  }}
+          # Startup probe
+          startupProbe:
+            httpGet:
+              path: /status/live
+              port: {{ $.Values.port.ingestor }}
+            periodSeconds: 10
+            failureThreshold: 180
           # Liveness probe
           livenessProbe:
             httpGet:
               path: /status/live
               port: {{ $.Values.port.ingestor }}
-            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 30
           # Readyness Probe
@@ -63,7 +69,6 @@ spec:
             httpGet:
               path: /status/ready
               port: {{ $.Values.port.ingestor }}
-            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 30
           {{- if $.Values.containerSecurityContext }}
